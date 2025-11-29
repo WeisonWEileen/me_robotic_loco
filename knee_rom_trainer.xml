@@ -1,0 +1,77 @@
+<mujoco model="knee_rom_trainer">
+    <!-- 使用弧度；惯量从几何自动算 -->
+    <compiler angle="radian" inertiafromgeom="true" />
+    <option timestep="0.002" gravity="0 0 -9.81" integrator="RK4" />
+
+    <default>
+        <!-- 单轴铰链关节，带被动刚度与阻尼 -->
+        <joint type="hinge" limited="true"
+            damping="0.8" stiffness="10.0"
+            armature="0.0" />
+        <!-- 小腿杆：0.5m, 质量 4kg, capsule 几何 -->
+        <geom type="capsule" size="0.03 0.25"
+            mass="4.0"
+            rgba="0.6 0.6 0.8 1" />
+    </default>
+
+    <!-- 只是记录参数，方便和课上表格对齐，并不直接参与计算 -->
+    <custom>
+        <!-- 下腿 + 脚质量 -->
+        <numeric name="m_leg" data="4.0" />
+        <!-- COM 距膝关节 -->
+        <numeric name="r_com" data="0.25" />
+        <!-- 等效惯量 I ≈ m r^2 -->
+        <numeric name="I_knee" data="0.25" />
+        <!-- 传动效率 / 传动比 / 电机常数 -->
+        <numeric name="eta" data="0.85" />
+        <numeric name="G" data="50.0" />
+        <numeric name="k_t" data="0.05" />
+        <!-- 最大电流 -->
+        <numeric name="i_max" data="2.0" />
+    </custom>
+
+    <worldbody>
+        <!-- 固定大腿/机架 -->
+        <body name="base" pos="0 0 0">
+            <geom type="sphere" size="0.05" rgba="0.3 0.3 0.3 1" />
+
+            <!-- 小腿 body，从膝关节开始向下伸出 0.5m -->
+            <body name="leg" pos="0 0 0">
+                <!-- 膝关节绕 y 轴转动 -->
+                <!-- 关节角度近似表示膝屈曲角；range 15°~120° -->
+                <joint name="knee"
+                    axis="0 1 0"
+                    range="0.26 2.09"
+                    stiffness="10.0"
+                    damping="0.8" />
+
+                <!-- 小腿杆 -->
+                <geom name="leg_geom"
+                    fromto="0 0 0   0 0 -0.5"
+                    size="0.03" />
+
+                <!-- 末端脚托 -->
+                <geom name="foot_pad"
+                    type="box"
+                    pos="0 0 -0.55"
+                    size="0.06 0.1 0.02"
+                    rgba="0.2 0.4 0.8 1" />
+            </body>
+        </body>
+    </worldbody>
+
+    <!-- 电机：控制量是电流 i，扭矩 = gear * i = η G k_t i -->
+    <!-- 课上参数：eta=0.85, G=50, k_t=0.05 → gear ≈ 2.125 N·m/A -->
+    <actuator>
+        <motor name="knee_motor"
+            joint="knee"
+            gear="2.125" />
+    </actuator>
+
+    <!-- 传感器：关节状态 + 电机扭矩 -->
+    <sensor>
+        <jointpos name="knee_pos" joint="knee" />
+        <jointvel name="knee_vel" joint="knee" />
+        <actuatorfrc name="motor_torque" actuator="knee_motor" />
+    </sensor>
+</mujoco>
