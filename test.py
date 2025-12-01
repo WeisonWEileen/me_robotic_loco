@@ -32,8 +32,8 @@ class ROMConfig:
     # Kd_pd: float = 4.0
     Kd_pd: float = 40.0
     # Impedance control (assistive)
-    K_imp: float = 8.0        # impedance stiffness K [Nm/rad]
-    B_imp: float = 1.0        # impedance damping B [Nms/rad]
+    K_imp: float = 70.0        # impedance stiffness K [Nm/rad]
+    B_imp: float = 15.0        # impedance damping B [Nms/rad]
 
     # Safety thresholds
     # torque_soft: float = 2.0    # Low threshold: slow down
@@ -500,7 +500,7 @@ def draw_neutral_plots(all_results):
     plt.ylabel("angle [deg]")
     plt.legend()
     plt.grid(True)
-    plt.savefig("knee_angle_tracking_neutral.png", dpi=300, bbox_inches="tight")
+    plt.savefig("output/knee_angle_tracking_neutral.png", dpi=300, bbox_inches="tight")
     plt.close()
 
     plt.figure()
@@ -514,7 +514,7 @@ def draw_neutral_plots(all_results):
     plt.ylabel("torque [Nm]")
     plt.legend()
     plt.grid(True)
-    plt.savefig("motor_torque_neutral.png", dpi=300, bbox_inches="tight")
+    plt.savefig("output/motor_torque_neutral.png", dpi=300, bbox_inches="tight")
     plt.close()
 
 def draw_resist_plots(all_results):
@@ -532,7 +532,7 @@ def draw_resist_plots(all_results):
     plt.ylabel("angle [deg]")
     plt.legend()
     plt.grid(True)
-    plt.savefig("knee_angle_tracking_resist.png", dpi=300, bbox_inches="tight")
+    plt.savefig("output/knee_angle_tracking_resist.png", dpi=300, bbox_inches="tight")
     plt.close()
 
     plt.figure()
@@ -543,7 +543,7 @@ def draw_resist_plots(all_results):
     plt.ylabel("torque [Nm]")
     plt.legend()
     plt.grid(True)
-    plt.savefig("motor_torque_resist.png", dpi=300, bbox_inches="tight")
+    plt.savefig("output/motor_torque_resist.png", dpi=300, bbox_inches="tight")
     plt.close()
 
     plt.figure()
@@ -554,7 +554,7 @@ def draw_resist_plots(all_results):
     plt.ylabel("torque [Nm]")
     plt.legend()
     plt.grid(True)
-    plt.savefig("patient_torque_resist.png", dpi=300, bbox_inches="tight")
+    plt.savefig("output/patient_torque_resist.png", dpi=300, bbox_inches="tight")
     plt.close()
 
 if __name__ == "__main__":
