@@ -5,14 +5,14 @@ pip install mujoco matplotlib
 
 # run without viewer and plot
 ```
-python ./test.py 
+python ./test_1.py 
 ```
 
 # run with viewer and visualize
 ```
-python ./test.py --viewer
+python ./test_1.py --viewer
 ```
 if you run on mac
 ```
-mjpython ./test.py --viewer
+mjpython ./test_1.py --viewer
 ```
