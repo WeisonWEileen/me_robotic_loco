@@ -1,7 +1,7 @@
 <mujoco model="knee_rom_trainer">
     <!-- 使用弧度；惯量从几何自动算 -->
     <compiler angle="radian" inertiafromgeom="true" />
-    <option timestep="0.002" gravity="0 0 -9.81" integrator="RK4" />
+    <option timestep="0.00005" gravity="0 0 -9.81" integrator="RK4" />
 
     <default>
         <!-- 单轴铰链关节，带被动刚度与阻尼 -->
@@ -38,10 +38,10 @@
             <!-- 小腿 body，从膝关节开始向下伸出 0.5m -->
             <body name="leg" pos="0 0 0">
                 <!-- 膝关节绕 y 轴转动 -->
-                <!-- 关节角度近似表示膝屈曲角；range 15°~120° -->
+                <!-- 关节角度近似表示膝屈曲角；range 15°~160° -->
                 <joint name="knee"
                     axis="0 1 0"
-                    range="0.26 2.09"
+                    range="-1.57 1.57"
                     stiffness="10.0"
                     damping="0.8" />
 
