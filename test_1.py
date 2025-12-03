@@ -27,22 +27,22 @@ class ROMConfig:
 
     # Control parameters
     # --- PD control: high stiffness, good tracking ---
-    Kp_pd: float = 130.0
-    Kd_pd: float = 40.0
+    Kp_pd: float = 220.0
+    Kd_pd: float = 55.0
 
     # --- Impedance control: softer, interaction-friendly ---
     # These values are chosen so that tracking is still decent,
     # but the torques are smaller and more compliant than PD.
-    K_imp: float = 70.0       # impedance stiffness K [Nm/rad]
-    B_imp: float = 15.0       # impedance damping B [Nms/rad]
+    K_imp: float = 140.0       # impedance stiffness K [Nm/rad]
+    B_imp: float = 28.0       # impedance damping B [Nms/rad]
 
     # Safety thresholds (as fraction of max motor torque)
     torque_soft_ratio: float = 0.6
     torque_hard_ratio: float = 0.8
 
     # Angle ranges (approximately 90° initial & 60° ROM)
-    theta_rest: float = math.radians(90.0)        # Rest angle: 90deg
-    theta_target: float = math.radians(90.0 + 60.0)  # Target elevation: +60deg
+    theta_rest: float = math.radians(0)        # Rest angle: 90deg
+    theta_target: float = math.radians(-90)  # Target elevation: +60deg
     raise_duration: float = 2.0    # Leg raise time [s]
     return_duration: float = 2.0   # Return-to-90° time [s]
 
@@ -86,27 +86,29 @@ def compute_reference(config: ROMConfig, mode: Mode,
 
     elif mode == Mode.RAISING:
         frac = min(1.0, t_mode / config.raise_duration)
-        theta_ref = theta_rest + frac * (theta_target - theta_rest)
-        # Linear interpolation, reference velocity = Δθ / T
-        theta_ref_dot = (theta_target - theta_rest) / config.raise_duration
+
+    # --- 使用余弦轨迹代替线性插值 ---
+        theta_ref = theta_rest + (1 - math.cos(math.pi * frac)) / 2 * (theta_target - theta_rest)
+        theta_ref_dot = (math.pi / (2 * config.raise_duration)) * math.sin(math.pi * frac) * (theta_target - theta_rest)
+
         if frac >= 1.0:
-            # After reaching target, start returning
-            return theta_ref, 0.0, Mode.RETURNING
+            return theta_target, 0.0, Mode.RETURNING
         return theta_ref, theta_ref_dot, mode
 
     elif mode == Mode.RETURNING:
         frac = min(1.0, t_mode / config.return_duration)
-        theta_ref = theta_target + frac * (theta_rest - theta_target)
-        theta_ref_dot = (theta_rest - theta_target) / config.return_duration
+
+        theta_ref = theta_target + (1 - math.cos(math.pi * frac)) / 2 * (theta_rest - theta_target)
+        theta_ref_dot = (math.pi / (2 * config.return_duration)) * math.sin(math.pi * frac) * (theta_rest - theta_target)
+
         if frac >= 1.0:
-            # Back to 90°, start raising again
             return theta_rest, 0.0, Mode.RAISING
         return theta_ref, theta_ref_dot, mode
 
     elif mode == Mode.STOPPED_AT_LIMIT:
         # Safety mode: slowly return to 90°
         frac = min(1.0, t_mode / config.return_duration)
-        theta_ref = theta_current + frac * (theta_rest - theta_current)
+        theta_ref = math.cos(theta_current + frac * (theta_rest - theta_current))
         theta_ref_dot = (theta_rest - theta_current) / config.return_duration
         if frac >= 1.0:
             return theta_rest, 0.0, Mode.RAISING
